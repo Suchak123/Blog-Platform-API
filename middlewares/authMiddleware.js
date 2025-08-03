@@ -5,8 +5,14 @@ dotenv.config();
 
 export const requireSignIn = async (req, res, next) => {
     try {
+
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Authorization token missing' });
+        }
         const decode = JWT.verify(
-            req.headers.authorization,
+            token,
             process.env.JWT_SECRET
         );
         console.log("Decoded User: ", decode);
@@ -15,7 +21,7 @@ export const requireSignIn = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         return res.status(401).json({
-            error: "Unauthorized access"
+            error: error.message
         });
     }
 }

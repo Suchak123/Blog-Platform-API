@@ -1,21 +1,15 @@
-import JWT from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
-export const requireSignIn = async (req, res, next) => {
+export const hashPassword = async (password) => {
     try {
-        const decode = JWT.verify(
-            req.headers.authorization,
-            process.env.JWT_SECRET
-        );
-        console.log("Decoded User: ", decode);
-        req.user = decode;
-        next();
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        return hashedPassword;
     } catch (error) {
         console.log(error);
-        return res.status(401).json({
-            error: "Unauthorized access"
-        });
     }
+}
+
+export const comparePassword = async(password, hashedPassword) => {
+    return bcrypt.compare(password, hashedPassword)
 }
