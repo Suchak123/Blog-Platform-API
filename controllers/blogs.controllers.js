@@ -61,20 +61,36 @@ const getAllBlogs = async(req,res) => {
 
 const createBlogController = async (req, res) => {
     try {
+
+         if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json(new ApiError(400, "No blog data provided"));
+        }
+        
+        if (!req.user || !req.user._id) {
+            return res.status(401).json(new ApiError(401, "User not authenticated"));
+        }
+
+        const { title, description, tags} = req.body;
+
         const blogData = {
-            ...req.body,
-            author: req.user._id
+            title,
+            description,
+            author: req.user._id,
+            tags
         };
+
+        console.log(blogData);
 
         const blog = new Blog(blogData);
         await blog.save();
 
         const populatedBlog = await Blog.findById(blog._id).populate('author', 'username email');
 
-        res.json(new ApiResponse(201, "Blog created successfully", {
+        return res.status(201).json(new ApiResponse(201, "Blog created successfully", {
             blog: populatedBlog
         }))
     } catch (error) {
+        console.error('Error creating blog', error);
         throw new ApiError(500, {error: error.message});
     }
 }
@@ -99,7 +115,10 @@ const getSingleBlogController = async (req,res) => {
 
 const updateBlogController = async (req,res) => {
     try {
-        const blog = await Blog.findByID(req.params.id);
+
+        const { id } = req.params;
+
+        const blog = await Blog.findById(id);
 
         if(!blog){
             throw new ApiError(404, 'Blog not found');
@@ -108,6 +127,7 @@ const updateBlogController = async (req,res) => {
         const updatedBlog = await Blog.findByIdAndUpdate(
             req.params.id,
             { ...req.body, updatedAt: new Date()},
+            { new: true}
         ).populate('author', 'username email');
 
         res.json({

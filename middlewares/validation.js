@@ -8,7 +8,7 @@ const BlogValidation = {
     }),
 
     update: Joi.object({
-        title: Joi.object().max(200),
+        title: Joi.string().max(200),
         description: Joi.string().max(500).trim(),
         tags: Joi.array().items(Joi.string().trim().lowercase()),
     }),

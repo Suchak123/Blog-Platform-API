@@ -5,12 +5,13 @@ import { requireSignIn } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
+//register user
 router.post("/register",validate(UserValidation.register), UserController.registerController);
 
+//login user
 router.post("/login", validate(UserValidation.login), UserController.loginController);
 
+//get user
 router.get("/get-user", requireSignIn, UserController.getUserController);
-// router.get("/get-one")
-// router.delete("/delete-user");
 
 export default router;
